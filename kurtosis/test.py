@@ -51,28 +51,45 @@ class SKTestCase(BaseModel):
 	thresh: float
 
 
+SIGMA_MIN = 0
+SIGMA_MAX = 6
+FRAC_MIN = 0
+FRAC_MAX = 0.1
+
+SPACING = 40
+
 test_cases = []
-test_fractions = [0, 0.001, 0.005, 0.01, 0.05]
-test_locs = [[0], [1], [2], [3]]
+test_fractions = np.linspace(FRAC_MIN, FRAC_MAX, SPACING)
+test_locs = [[el] for el in np.linspace(SIGMA_MIN, SIGMA_MAX, SPACING)]
+thresh = 3
 
-for test_frac in test_fractions:
-	for test_loc in test_locs:
-		test_cases.append(SKTestCase(
-			test_fraction = test_frac,
-			test_locs = test_loc,
-			thresh = 3
-			)
-		)
+heatmap = np.empty(shape = (len(test_locs), len(test_fractions)))
 
-for case in test_cases:
-	test_sk, test_sk_mean, test_sk_sigma = runtest(locs = case.test_locs, fraction = case.test_fraction, saveplot = True)
-	if abs(test_sk - test_sk_mean) > case.thresh * test_sk_sigma:
-		print(bcolors.FAIL)
-	else:
-		print(bcolors.OKGREEN)
+for frac_idx, test_frac in enumerate(test_fractions):
+	for loc_idx, test_loc in enumerate(test_locs):
+		test_sk, test_sk_mean, test_sk_sigma = runtest(locs = test_loc, fraction = test_frac)
+		
+		if abs(test_sk - test_sk_mean) > thresh * test_sk_sigma:
+			print(bcolors.FAIL)
+		else:
+			print(bcolors.OKGREEN)
 
-	sk_distance = (test_sk - test_sk_mean) / test_sk_sigma
+		sk_distance = (test_sk - test_sk_mean) / test_sk_sigma
 
-	print(f"Dist w/ {case.test_fraction} pollution at μ + xσ, x = {case.test_locs}")
-	print(f"\tSK: {round(test_sk, 4)} = μ + {round(sk_distance, 4)}σ")
-	print(bcolors.ENDC)
+		print(f"Dist w/ {test_frac} pollution at μ + xσ, x = {test_loc}")
+		print(f"\tSK: {round(test_sk, 4)} = μ + {round(sk_distance, 4)}σ")
+		print(bcolors.ENDC)
+
+		heatmap[loc_idx][frac_idx] = abs(sk_distance)
+
+fig, ax = plt.subplots()
+ax.set_title("SK (σ's from μ of SK) vs. spike-σ and sample fraction")
+ax.set_xlabel("Fraction of samples polluted")
+ax.set_ylabel("σ from mean of spike")
+im = ax.imshow(heatmap, 
+	cmap = 'coolwarm', 
+	extent = [FRAC_MIN, FRAC_MAX, SIGMA_MAX, SIGMA_MIN], 
+	aspect = (FRAC_MAX - FRAC_MIN) / (SIGMA_MAX - SIGMA_MIN)
+)
+fig.colorbar(im, ax = ax)
+plt.show()
