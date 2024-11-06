@@ -59,7 +59,7 @@ for fname in sorted(os.listdir(guppidir)):
 				guppi_fileptr = guppi.Guppi(os.path.join(guppidir, fname))
 				guppi_to_fil(guppi_fileptr, filout, n_stds = thresh)
 
-        nfiles += 1
+		nfiles += 1
 
-        if (nfiles + 1) % 5 == 0:
-            cont = input("Processed %d files, press enter to continue: ")
+		if (nfiles + 1) % 5 == 0:
+			cont = input("Processed %d files, press enter to continue: ")
