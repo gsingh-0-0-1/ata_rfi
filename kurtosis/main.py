@@ -6,16 +6,28 @@ import matplotlib
 import matplotlib.pyplot as plt
 from filutils import init_filterbank
 import os
+import sys
 
 from constants import *
 from skutils import (
 	guppi_to_fil
 )
 
-WRITE_RAW = True
-WRITE_PROC = True
 
-thresholds = [3]
+WRITE_RAW = False
+WRITE_PROC = False
+thresholds = []
+
+# expects [mode -- RAW/PROC] [stdthresh, if proc]
+
+if sys.argv[1] == "RAW":
+	WRITE_RAW = True
+if sys.argv[1] == "PROC":
+	WRITE_PROC = True
+
+if WRITE_PROC:
+	thresholds.append(float(sys.argv[2]))
+
 proc_filout_ptrs = []
 
 imdir = 'images/'
