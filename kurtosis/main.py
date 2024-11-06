@@ -1,7 +1,5 @@
 import numpy as np
 from sigpyproc.readers import FilReader
-from scipy.stats import norm
-import blimpy
 from guppi import guppi
 from astropy.time import Time
 import matplotlib
