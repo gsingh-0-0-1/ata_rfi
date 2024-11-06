@@ -22,9 +22,13 @@ proc_filout_ptrs = []
 
 imdir = 'images/'
 outdir = 'outfiles/'
-guppidir = 'datafiles/'
+#guppidir = 'datafiles/'
+guppidir = '/mnt/primary/scratch/crush/guppi_60516_74066_177093_J0332+5434_0001/GUPPI'
 
-FIL_COPY = "datafiles/fout.fil"
+#FIL_COPY = "datafiles/fout.fil"
+FIL_COPY = "/mnt/primary/scratch/crush/guppi_60479_79539_018100_J0332+5434_0001/fout.fil"
+
+
 fpath = os.path.join(guppidir, [el for el in os.listdir(guppidir) if 'guppi' in el][0])
 
 
@@ -42,8 +46,9 @@ if WRITE_RAW:
 if not WRITE_RAW and not WRITE_PROC:
 	raise Exception("No files to be written!")
 
+nfiles = 0
 for fname in sorted(os.listdir(guppidir)):
-	if 'guppi' in fname and '0006.raw' not in fname:
+	if 'guppi' in fname:
 		print("Starting to process", fname)
 
 		if WRITE_RAW:
@@ -54,3 +59,7 @@ for fname in sorted(os.listdir(guppidir)):
 				guppi_fileptr = guppi.Guppi(os.path.join(guppidir, fname))
 				guppi_to_fil(guppi_fileptr, filout, n_stds = thresh)
 
+        nfiles += 1
+
+        if (nfiles + 1) % 5 == 0:
+            cont = input("Processed %d files, press enter to continue: ")
