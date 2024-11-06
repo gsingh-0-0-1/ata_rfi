@@ -1,0 +1,2 @@
+SAMP_STEP = 2 ** 8
+T_INT = 32

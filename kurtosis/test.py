@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import random
 from pydantic import BaseModel
 from typing import List
+from matplotlib import colors
 
 from kurtosis import (
 	spectral_kurtosis,
@@ -24,7 +25,7 @@ class bcolors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-def runtest(shape = (100000,), locs = [3], fraction = 0.1, display = False, saveplot = False):
+def runtest(shape = (4096,), locs = [3], fraction = 0.1, display = False, saveplot = False):
 	arr = rfi_polluted_normal_complex(shape = shape, locs = locs, fraction = fraction)
 	sk = spectral_kurtosis(arr)
 	M = shape[0]
@@ -53,13 +54,15 @@ class SKTestCase(BaseModel):
 
 SIGMA_MIN = 0
 SIGMA_MAX = 6
-FRAC_MIN = 0
-FRAC_MAX = 0.1
+FRAC_MIN = 0.1
+FRAC_MAX = 0.8
 
-SPACING = 40
+SPACING = 30
+
 
 test_cases = []
 test_fractions = np.linspace(FRAC_MIN, FRAC_MAX, SPACING)
+#test_locs = [[1], [2, 3.5]]
 test_locs = [[el] for el in np.linspace(SIGMA_MIN, SIGMA_MAX, SPACING)]
 thresh = 3
 
@@ -80,16 +83,24 @@ for frac_idx, test_frac in enumerate(test_fractions):
 		print(f"\tSK: {round(test_sk, 4)} = μ + {round(sk_distance, 4)}σ")
 		print(bcolors.ENDC)
 
+		#heatmap[loc_idx][frac_idx] = test_sk
 		heatmap[loc_idx][frac_idx] = abs(sk_distance)
+
 
 fig, ax = plt.subplots()
 ax.set_title("SK (σ's from μ of SK) vs. spike-σ and sample fraction")
 ax.set_xlabel("Fraction of samples polluted")
 ax.set_ylabel("σ from mean of spike")
+
+#norm = colors.TwoSlopeNorm(vmin = np.amin(heatmap), vcenter=1, vmax=np.amax(heatmap))
+#norm = colors.CenteredNorm(vcenter = 1)
+
 im = ax.imshow(heatmap, 
-	cmap = 'coolwarm', 
+	cmap = 'seismic', 
 	extent = [FRAC_MIN, FRAC_MAX, SIGMA_MAX, SIGMA_MIN], 
-	aspect = (FRAC_MAX - FRAC_MIN) / (SIGMA_MAX - SIGMA_MIN)
+	aspect = (FRAC_MAX - FRAC_MIN) / (SIGMA_MAX - SIGMA_MIN),
+	#norm = norm,
+	vmax = 4.
 )
 fig.colorbar(im, ax = ax)
 plt.show()
