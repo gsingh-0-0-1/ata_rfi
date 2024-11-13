@@ -10,6 +10,7 @@ fdir = "outfiles/"
 fnames = [
 	"raw_output.fil",
 	"proc_std_3_tint_32_chunk_256.fil",
+	"proc_std_5_tint_32_chunk_256.fil",
 ]
 
 ncols = len(fnames)
@@ -21,11 +22,17 @@ for col, fname in enumerate(fnames):
 
 	plt.subplot(2, ncols, col + 1)
 	plt.title(fname)
-	im = plt.imshow(fp.data)
+	im = plt.imshow(10 * np.log10(fp.data))
 	plt.colorbar(im)
 
 	plt.subplot(2, ncols, ncols + col + 1)
-	plt.title(fname)
-	plt.plot(folded.get_profile().data)
+
+	profile = 10 * np.log10(folded.get_profile().data / 192)
+	med = np.median(profile)
+	signal = np.sum((profile - med)[60:69]) / np.sqrt(9)
+	noise = np.sqrt(np.mean((profile - med) ** 2))
+	title = fname + ("\nSNR = %.5f" % (signal / noise,))
+	plt.title(title)
+	plt.plot(profile)
 
 plt.show()
