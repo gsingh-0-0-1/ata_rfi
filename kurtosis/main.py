@@ -28,6 +28,9 @@ if sys.argv[1] == "PROC":
 if WRITE_PROC:
 	thresholds.append(float(sys.argv[2]))
 
+if WRITE_PROC:
+	SAMP_STEP = int(sys.argv[2])
+
 proc_filout_ptrs = []
 
 imdir = 'images/'
