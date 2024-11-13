@@ -18,7 +18,10 @@ WRITE_RAW = False
 WRITE_PROC = False
 thresholds = []
 
-# expects [mode -- RAW/PROC] [stdthresh, if proc]
+# expects [mode -- RAW/PROC] [stdthresh, if proc] [chunksize, if proc] [maxfiles, if proc]
+
+
+# TODO -- use argparse for this
 
 if sys.argv[1] == "RAW":
 	WRITE_RAW = True
@@ -30,6 +33,12 @@ if WRITE_PROC:
 
 if WRITE_PROC:
 	SAMP_STEP = int(sys.argv[2])
+
+MAX_FILES = None
+if WRITE_PROC:
+	MAX_FILES = int(sys.argv[3])
+
+
 
 proc_filout_ptrs = []
 
@@ -62,6 +71,10 @@ if not WRITE_RAW and not WRITE_PROC:
 nfiles = 0
 for fname in sorted(os.listdir(guppidir)):
 	if 'guppi' in fname:
+
+		if nfiles > MAX_FILES:
+			break
+
 		print("Starting to process", fname)
 
 		if WRITE_RAW:
@@ -73,6 +86,3 @@ for fname in sorted(os.listdir(guppidir)):
 				guppi_to_fil(guppi_fileptr, filout, n_stds = thresh)
 
 		nfiles += 1
-
-		if (nfiles + 1) % 5 == 0:
-			cont = input("Processed %d files, press enter to continue: ")
