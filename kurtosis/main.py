@@ -32,11 +32,11 @@ if WRITE_PROC:
 	thresholds.append(float(sys.argv[2]))
 
 if WRITE_PROC:
-	SAMP_STEP = int(sys.argv[2])
+	SAMP_STEP = int(sys.argv[3])
 
 MAX_FILES = -1
 if WRITE_PROC:
-	MAX_FILES = int(sys.argv[3])
+	MAX_FILES = int(sys.argv[4])
 
 
 
