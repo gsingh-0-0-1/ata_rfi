@@ -9,8 +9,12 @@ fdir = "outfiles/"
 
 fnames = [
 	"raw_output.fil",
-	"proc_std_3_tint_32_chunk_256.fil",
-	"proc_std_5_tint_32_chunk_256.fil",
+	"proc_std_3_tint_16_chunk_256.fil",
+	"proc_std_3_tint_16_chunk_512.fil",
+	"proc_std_3_tint_16_chunk_1024.fil",
+	"proc_std_5_tint_16_chunk_256.fil",
+	"proc_std_5_tint_16_chunk_512.fil",
+	"proc_std_5_tint_16_chunk_1024.fil"
 ]
 
 ncols = len(fnames)

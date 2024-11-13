@@ -42,7 +42,7 @@ def mask_chunk(chunk, mask_method: MaskMethod = MaskMethod.CHUNK_MEDIAN, n_stds 
 	sk_arr = sk_from_arr(chunk)
 
 	sk_mean = 1
-	sk_std = np.sqrt(4. / SAMP_STEP)
+	sk_std = np.sqrt(4. / chunksize)
 
 	mask = np.abs(sk_arr - sk_mean) < n_stds * sk_std
 	maskedblock = chunk * mask
@@ -61,7 +61,7 @@ def write_chunk_to_fil(chunk, fileptr):
 
 	towrite.tofile(fileptr)
 
-def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3):
+def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3, chunksize = chunksize):
 	blocknum = 0
 	while True:
 		print("Reading block %d of %s..." % (blocknum, guppi_fileptr.fname))
@@ -71,9 +71,9 @@ def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3):
 
 		print("\t(NANT, NCHAN, NSAMP, NPOL):\t", block.shape)
 
-		for nstart in range(0, block.shape[2], SAMP_STEP):
-			print("\t\tNSAMPS", nstart, "\t->\t", nstart + SAMP_STEP)
-			data = block[:, :, nstart:nstart+SAMP_STEP, :]
+		for nstart in range(0, block.shape[2], chunksize):
+			print("\t\tNSAMPS", nstart, "\t->\t", nstart + chunksize)
+			data = block[:, :, nstart:nstart+chunksize, :]
 
 			if rfi_filter:
 				masked, mask = mask_chunk(data, MaskMethod.CHUNK_MEDIAN, n_stds = n_stds)
