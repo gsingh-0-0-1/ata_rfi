@@ -83,10 +83,10 @@ for fname in sorted(os.listdir(guppidir)):
 
 		if WRITE_RAW:
 			guppi_fileptr = guppi.Guppi(os.path.join(guppidir, fname))
-			guppi_to_fil(guppi_fileptr, rawfilout, False, SAMP_STEP)
+			guppi_to_fil(guppi_fileptr, rawfilout, False, chunksize = SAMP_STEP)
 		if WRITE_PROC:
 			for thresh, filout in zip(thresholds, proc_filout_ptrs):
 				guppi_fileptr = guppi.Guppi(os.path.join(guppidir, fname))
-				guppi_to_fil(guppi_fileptr, filout, n_stds = thresh)
+				guppi_to_fil(guppi_fileptr, filout, n_stds = thresh, chunksize = SAMP_STEP)
 
 		nfiles += 1
