@@ -64,7 +64,7 @@ def write_chunk_to_fil(chunk, fileptr):
 def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3):
 	blocknum = 0
 	while True:
-		print("Reading block %d of %s..." % (blocknum, guppi_fileptr.name))
+		print("Reading block %d of %s..." % (blocknum, guppi_fileptr.fname))
 		hdr, block = guppi_fileptr.read_next_block()
 		if not hdr:
 			break

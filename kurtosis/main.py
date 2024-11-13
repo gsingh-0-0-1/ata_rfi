@@ -34,7 +34,7 @@ if WRITE_PROC:
 if WRITE_PROC:
 	SAMP_STEP = int(sys.argv[2])
 
-MAX_FILES = None
+MAX_FILES = -1
 if WRITE_PROC:
 	MAX_FILES = int(sys.argv[3])
 
@@ -72,7 +72,7 @@ nfiles = 0
 for fname in sorted(os.listdir(guppidir)):
 	if 'guppi' in fname:
 
-		if nfiles > MAX_FILES:
+		if nfiles > MAX_FILES and MAX_FILES != -1:
 			break
 
 		print("Starting to process", fname)
