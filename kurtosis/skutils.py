@@ -38,7 +38,7 @@ def sk_from_arr(data):
 
 	return sk_array
 
-def mask_chunk(chunk, mask_method: MaskMethod = MaskMethod.CHUNK_MEDIAN, n_stds = 3):
+def mask_chunk(chunk, mask_method: MaskMethod = MaskMethod.CHUNK_MEDIAN, n_stds = 3, chunksize = SAMP_STEP):
 	sk_arr = sk_from_arr(chunk)
 
 	sk_mean = 1
@@ -76,7 +76,7 @@ def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3, chun
 			data = block[:, :, nstart:nstart+chunksize, :]
 
 			if rfi_filter:
-				masked, mask = mask_chunk(data, MaskMethod.CHUNK_MEDIAN, n_stds = n_stds)
+				masked, mask = mask_chunk(data, MaskMethod.CHUNK_MEDIAN, n_stds = n_stds, chunksize)
 				write_chunk_to_fil(masked, fil_fileptr)
 			else:
 				write_chunk_to_fil(data, fil_fileptr)
