@@ -61,7 +61,7 @@ def write_chunk_to_fil(chunk, fileptr):
 
 	towrite.tofile(fileptr)
 
-def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3, chunksize = chunksize):
+def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3, chunksize = SAMP_STEP):
 	blocknum = 0
 	while True:
 		print("Reading block %d of %s..." % (blocknum, guppi_fileptr.fname))
