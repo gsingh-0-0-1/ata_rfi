@@ -18,13 +18,16 @@ WRITE_RAW = False
 WRITE_PROC = False
 thresholds = []
 
-# expects [mode -- RAW/PROC] [stdthresh, if proc] [chunksize, if proc] [maxfiles, if proc]
+MAX_FILES = -1
 
+# expects [PROC] [stdthresh] [chunksize] [maxfiles]
+# expects [RAW] [maxfiles]
 
 # TODO -- use argparse for this
 
 if sys.argv[1] == "RAW":
 	WRITE_RAW = True
+
 if sys.argv[1] == "PROC":
 	WRITE_PROC = True
 
@@ -34,9 +37,10 @@ if WRITE_PROC:
 if WRITE_PROC:
 	SAMP_STEP = int(sys.argv[3])
 
-MAX_FILES = -1
 if WRITE_PROC:
 	MAX_FILES = int(sys.argv[4])
+if WRITE_RAW:
+	MAX_FILES = int(sys.argv[2])
 
 
 
