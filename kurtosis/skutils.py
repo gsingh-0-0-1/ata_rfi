@@ -10,6 +10,34 @@ class MaskMethod(Enum):
 def mag2(data):
 	return data.real * data.real + data.imag * data.imag
 
+def sklim_bounds(std, nsamps):
+	# rather than slowing ourselves down with a call
+	# to os.system, we can just hardcode the values
+	# that we'll need
+
+	sklim_vals = {
+		3 : {
+			256 : [0.698159, 1.49597],
+			512 : [0.775046, 1.32542],
+			1024 : [0.834186, 1.21695]
+		},
+		4 : {
+			256 : [0.613738, 1.784],
+			512 : [0.711612, 1.48684],
+			1024 : [0.786484, 1.31218],
+		},
+		5 : {
+			256 : [0.526881, 2.18694],
+			512 : [0.649093, 1.69044],
+			1024 : [0.740405, 1.42332]
+		}
+	}
+
+	try:
+		return sklim_vals[std][nsamps]
+	else:
+		raise Exception("no sklim values present for stddev %.2f and nsamps %d" % (stddev, nsamps))
+
 def time_integrate(data, t_int = T_INT):
 	pol_sum = mag2(data).sum(axis = -1)
 
@@ -42,9 +70,12 @@ def mask_chunk(chunk, mask_method: MaskMethod = MaskMethod.CHUNK_MEDIAN, n_stds 
 	sk_arr = sk_from_arr(chunk)
 
 	sk_mean = 1
-	sk_std = np.sqrt(4. / chunksize)
+	
+	#sk_std = np.sqrt(4. / chunksize)
+	sk_bounds = sklim_bounds(n_stds, chunksize)
 
-	mask = np.abs(sk_arr - sk_mean) < n_stds * sk_std
+	#mask = np.abs(sk_arr - sk_mean) < n_stds * sk_std
+	mask = np.logical_and(sk_arr > sk_bounds[0], sk_arr < sk_bounds[1])
 	maskedblock = chunk * mask
 
 	if mask_method == MaskMethod.CHUNK_MEDIAN:

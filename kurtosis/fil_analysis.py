@@ -9,15 +9,21 @@ fdir = "outfiles/"
 
 fnames = [
 	"raw_output.fil",
-	"proc_std_3_tint_16_chunk_256.fil",
-	"proc_std_3_tint_16_chunk_512.fil",
-	"proc_std_3_tint_16_chunk_1024.fil",
+	#"proc_std_3_tint_16_chunk_256.fil",
+	#"proc_std_3_tint_16_chunk_512.fil",
+	#"proc_std_3_tint_16_chunk_1024.fil",
+	#"proc_std_4_tint_16_chunk_256.fil",
+	#"proc_std_4_tint_16_chunk_512.fil",
+	#"proc_std_4_tint_16_chunk_1024.fil",
 	"proc_std_5_tint_16_chunk_256.fil",
 	"proc_std_5_tint_16_chunk_512.fil",
-	"proc_std_5_tint_16_chunk_1024.fil"
+	"proc_std_5_tint_16_chunk_1024.fil",
 ]
 
 ncols = len(fnames)
+
+PULSE_START = 56
+PULSE_END = 71
 
 for col, fname in enumerate(fnames):
 	fil = FilReader(os.path.join(fdir, fname))
@@ -33,8 +39,14 @@ for col, fname in enumerate(fnames):
 
 	profile = 10 * np.log10(folded.get_profile().data / 192)
 	med = np.median(profile)
-	signal = np.sum((profile - med)[60:69]) / np.sqrt(9)
-	noise = np.sqrt(np.mean((profile - med) ** 2))
+	signal = np.sum((profile - med)[PULSE_START:PULSE_END]) / np.sqrt(9)
+
+	# remove the pulse from the profile
+	offpulse = profile - med
+	offpulse[PULSE_START:PULSE_END] = 0
+
+
+	noise = np.sqrt(np.mean(offpulse ** 2))
 	title = fname + ("\nSNR = %.5f" % (signal / noise,))
 	plt.title(title)
 	plt.plot(profile)
