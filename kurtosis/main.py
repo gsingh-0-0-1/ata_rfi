@@ -45,6 +45,7 @@ if WRITE_RAW:
 
 
 proc_filout_ptrs = []
+mask_stat_paths = []
 
 imdir = 'images/'
 outdir = 'outfiles/'
@@ -66,6 +67,13 @@ if WRITE_PROC:
 			T_INT
 		)
 		proc_filout_ptrs.append(filout)
+
+		maskoutpath = outdir + 'mask_std_%d_tint_%d_chunk_%d.fil' % (thresh, T_INT, SAMP_STEP)
+		try:
+			os.remove(maskoutpath)
+		except Exception:
+			pass
+		mask_stat_paths.append(maskoutpath)
 if WRITE_RAW:
 	rawfilout = init_filterbank(FIL_COPY, fpath, outdir + 'raw_output.fil', T_INT)
 
@@ -83,10 +91,10 @@ for fname in sorted(os.listdir(guppidir)):
 
 		if WRITE_RAW:
 			guppi_fileptr = guppi.Guppi(os.path.join(guppidir, fname))
-			guppi_to_fil(guppi_fileptr, rawfilout, False, chunksize = SAMP_STEP)
+			guppi_to_fil(guppi_fileptr, rawfilout, None, False, chunksize = SAMP_STEP)
 		if WRITE_PROC:
-			for thresh, filout in zip(thresholds, proc_filout_ptrs):
+			for thresh, filout, mask_stat_path in zip(thresholds, proc_filout_ptrs, mask_stat_paths):
 				guppi_fileptr = guppi.Guppi(os.path.join(guppidir, fname))
-				guppi_to_fil(guppi_fileptr, filout, n_stds = thresh, chunksize = SAMP_STEP)
+				guppi_to_fil(guppi_fileptr, filout, mask_stat_path, n_stds = thresh, chunksize = SAMP_STEP)
 
 		nfiles += 1

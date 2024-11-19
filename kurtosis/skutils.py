@@ -35,7 +35,7 @@ def sklim_bounds(std, nsamps):
 
 	try:
 		return sklim_vals[std][nsamps]
-	else:
+	except Exception:
 		raise Exception("no sklim values present for stddev %.2f and nsamps %d" % (stddev, nsamps))
 
 def time_integrate(data, t_int = T_INT):
@@ -81,7 +81,7 @@ def mask_chunk(chunk, mask_method: MaskMethod = MaskMethod.CHUNK_MEDIAN, n_stds 
 	if mask_method == MaskMethod.CHUNK_MEDIAN:
 		maskedblock[np.where(maskedblock == 0)] = np.median(chunk)
 
-	return maskedblock, mask
+	return maskedblock, np.sum(mask) / mask.size
 
 def write_chunk_to_fil(chunk, fileptr):
 	# sum over antenna axis
@@ -92,7 +92,7 @@ def write_chunk_to_fil(chunk, fileptr):
 
 	towrite.tofile(fileptr)
 
-def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3, chunksize = SAMP_STEP):
+def guppi_to_fil(guppi_fileptr, fil_fileptr, mask_path = None, rfi_filter = True, n_stds = 3, chunksize = SAMP_STEP):
 	blocknum = 0
 	while True:
 		print("Reading block %d of %s..." % (blocknum, guppi_fileptr.fname))
@@ -107,8 +107,13 @@ def guppi_to_fil(guppi_fileptr, fil_fileptr, rfi_filter = True, n_stds = 3, chun
 			data = block[:, :, nstart:nstart+chunksize, :]
 
 			if rfi_filter:
-				masked, mask = mask_chunk(data, MaskMethod.CHUNK_MEDIAN, n_stds = n_stds, chunksize = chunksize)
+				masked, mask_frac = mask_chunk(data, MaskMethod.CHUNK_MEDIAN, n_stds = n_stds, chunksize = chunksize)
 				write_chunk_to_fil(masked, fil_fileptr)
+				if mask_path:
+					f = open(mask_path, 'a')
+					f.write('%.5f' % mask_frac)
+					f.write("\n")
+					f.close()
 			else:
 				write_chunk_to_fil(data, fil_fileptr)
 

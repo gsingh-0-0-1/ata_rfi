@@ -31,7 +31,7 @@ im = plt.imshow(100 * (SNRS - SNR_RAW) / SNR_RAW,
 	extent = extent,
 	aspect = aspect,
 	norm = colors.CenteredNorm(vcenter = 0),
-	cmap = 'bwr'
+	cmap = 'coolwarm'
 )
 plt.colorbar(im)
 
