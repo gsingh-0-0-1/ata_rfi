@@ -50,7 +50,7 @@ mask_stat_paths = []
 imdir = 'images/'
 outdir = 'outfiles/'
 #guppidir = 'datafiles/'
-guppidir = '/mnt/primary/scratch/crush/guppi_60516_74066_177093_J0332+5434_0001/GUPPI'
+guppidir = '/mnt/primary/scratch/crush/LoA.C0736/GUPPI/'
 
 #FIL_COPY = "datafiles/fout.fil"
 FIL_COPY = "/mnt/primary/scratch/crush/guppi_60479_79539_018100_J0332+5434_0001/fout.fil"
@@ -68,7 +68,7 @@ if WRITE_PROC:
 		)
 		proc_filout_ptrs.append(filout)
 
-		maskoutpath = outdir + 'mask_std_%d_tint_%d_chunk_%d.fil' % (thresh, T_INT, SAMP_STEP)
+		maskoutpath = outdir + 'mask_std_%d_tint_%d_chunk_%d.mask' % (thresh, T_INT, SAMP_STEP)
 		try:
 			os.remove(maskoutpath)
 		except Exception:
