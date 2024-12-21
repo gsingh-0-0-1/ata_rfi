@@ -1,6 +1,7 @@
 from enum import Enum
 from constants import *
 import numpy as np
+from kurtosis_gpu import apply_kurtosis_to_block
 
 class MaskMethod(Enum):
 	ZERO = 0
@@ -107,13 +108,16 @@ def guppi_to_fil(guppi_fileptr, fil_fileptr, mask_path = None, rfi_filter = True
 			data = block[:, :, nstart:nstart+chunksize, :]
 
 			if rfi_filter:
-				masked, mask_frac = mask_chunk(data, MaskMethod.CHUNK_MEDIAN, n_stds = n_stds, chunksize = chunksize)
-				write_chunk_to_fil(masked, fil_fileptr)
-				if mask_path:
-					f = open(mask_path, 'a')
-					f.write('%.5f' % mask_frac)
-					f.write("\n")
-					f.close()
+				
+				apply_kurtosis_to_block(data)
+				write_chunk_to_fil(data, fil_fileptr)
+				#masked, mask_frac = mask_chunk(data, MaskMethod.CHUNK_MEDIAN, n_stds = n_stds, chunksize = chunksize)
+				#write_chunk_to_fil(masked, fil_fileptr)
+				#if mask_path:
+				#	f = open(mask_path, 'a')
+				#	f.write('%.5f' % mask_frac)
+				#	f.write("\n")
+				#	f.close()
 			else:
 				write_chunk_to_fil(data, fil_fileptr)
 
