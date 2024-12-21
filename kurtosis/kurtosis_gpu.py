@@ -53,7 +53,7 @@ def apply_kurtosis_to_block(block: np.array, n_stds = 3):
 	# mask = cp.logical_and(sk_arr > sk_bounds[0], sk_arr < sk_bounds[1])
 	maskedblock = block_cp * mask
 
-	maskedblock[cp.where(maskedblock == 0)] = cp.median(chunk)
+	maskedblock[cp.where(maskedblock == 0)] = cp.median(block_cp)
 
 	block = maskedblock.asnumpy()
 
