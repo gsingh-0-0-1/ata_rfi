@@ -6,7 +6,8 @@ from guppi import guppi
 
 from kurtosis_gpu import apply_kurtosis_to_block
 from skutils import (
-	mask_chunk
+	mask_chunk,
+	MaskMethod
 )
 
 
