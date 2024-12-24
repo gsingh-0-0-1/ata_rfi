@@ -20,6 +20,7 @@ thresholds = []
 
 MAX_FILES = -1
 
+GPU_ARG = None
 USE_GPU = False
 
 # expects [PROC] [stdthresh] [chunksize] [maxfiles] [GPU / CPU]
@@ -37,6 +38,7 @@ if WRITE_PROC:
 	thresholds.append(float(sys.argv[2]))
 	SAMP_STEP = int(sys.argv[3])
 	MAX_FILES = int(sys.argv[4])
+	GPU_ARG = sys.argv[5]
 	if sys.argv[5] == 'GPU':
 		USE_GPU = True
 
@@ -61,15 +63,16 @@ fpath = os.path.join(guppidir, [el for el in os.listdir(guppidir) if 'guppi' in 
 
 
 if WRITE_PROC:
+	fname_stem = 'std_%d_tint_%d_chunk_%d_%s' % (thresh, T_INT, SAMP_STEP, GPU_ARG)
 	for thresh in thresholds:
 		filout = init_filterbank(FIL_COPY,
 			fpath,
-			outdir + 'proc_std_%d_tint_%d_chunk_%d.fil' % (thresh, T_INT, SAMP_STEP),
+			outdir + 'proc_%s.fil' % fname_stem,
 			T_INT
 		)
 		proc_filout_ptrs.append(filout)
 
-		maskoutpath = outdir + 'mask_std_%d_tint_%d_chunk_%d.mask' % (thresh, T_INT, SAMP_STEP)
+		maskoutpath = outdir + 'mask_%s.mask' % fname_stem
 		try:
 			os.remove(maskoutpath)
 		except Exception:
