@@ -1,17 +1,19 @@
 import numpy as np
 from sigpyproc.readers import FilReader
 import os
+import sys
+from guppi import guppi
 
 from kurtosis_gpu import apply_kurtosis_to_block
 from skutils import (
-	guppi_to_fil
+	mask_chunk
 )
 
 
 guppidir = '/mnt/primary/scratch/crush/LoA.C0736/GUPPI/'
 
 chunksize = int(sys.argv[1])
-nstds = int(sys.argv[2])
+n_stds = int(sys.argv[2])
 
 
 for fname in sorted(os.listdir(guppidir)):
