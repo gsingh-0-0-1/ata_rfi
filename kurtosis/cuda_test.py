@@ -38,7 +38,7 @@ for fname in sorted(os.listdir(guppidir)):
 				data_gpu = np.copy(data)
 				apply_kurtosis_to_block(data_gpu, n_stds = n_stds)
 
-                                if np.sum(data_gpu != data) == 0:
+				if np.sum(data_gpu != data) == 0:
 					print("WARNING: Highly unlikely -- no change due to SK in GPU code")
                                 
 
