@@ -20,7 +20,9 @@ thresholds = []
 
 MAX_FILES = -1
 
-# expects [PROC] [stdthresh] [chunksize] [maxfiles]
+USE_GPU = False
+
+# expects [PROC] [stdthresh] [chunksize] [maxfiles] [GPU / CPU]
 # expects [RAW] [maxfiles]
 
 # TODO -- use argparse for this
@@ -33,12 +35,11 @@ if sys.argv[1] == "PROC":
 
 if WRITE_PROC:
 	thresholds.append(float(sys.argv[2]))
-
-if WRITE_PROC:
 	SAMP_STEP = int(sys.argv[3])
-
-if WRITE_PROC:
 	MAX_FILES = int(sys.argv[4])
+	if sys.argv[5] == 'GPU':
+		USE_GPU = True
+
 if WRITE_RAW:
 	MAX_FILES = int(sys.argv[2])
 
@@ -91,10 +92,20 @@ for fname in sorted(os.listdir(guppidir)):
 
 		if WRITE_RAW:
 			guppi_fileptr = guppi.Guppi(os.path.join(guppidir, fname))
-			guppi_to_fil(guppi_fileptr, rawfilout, None, False, chunksize = SAMP_STEP)
+			guppi_to_fil(guppi_fileptr, 
+				rawfilout, 
+				None, 
+				False, 
+				chunksize = SAMP_STEP, 
+				gpu = False)
 		if WRITE_PROC:
 			for thresh, filout, mask_stat_path in zip(thresholds, proc_filout_ptrs, mask_stat_paths):
 				guppi_fileptr = guppi.Guppi(os.path.join(guppidir, fname))
-				guppi_to_fil(guppi_fileptr, filout, mask_stat_path, n_stds = thresh, chunksize = SAMP_STEP)
+				guppi_to_fil(guppi_fileptr, 
+					filout, 
+					mask_stat_path, 
+					n_stds = thresh, 
+					chunksize = SAMP_STEP, 
+					gpu = USE_GPU)
 
 		nfiles += 1
