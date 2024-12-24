@@ -63,8 +63,8 @@ fpath = os.path.join(guppidir, [el for el in os.listdir(guppidir) if 'guppi' in 
 
 
 if WRITE_PROC:
-	fname_stem = 'std_%d_tint_%d_chunk_%d_%s' % (thresh, T_INT, SAMP_STEP, GPU_ARG)
 	for thresh in thresholds:
+		fname_stem = 'std_%d_tint_%d_chunk_%d_%s' % (thresh, T_INT, SAMP_STEP, GPU_ARG)
 		filout = init_filterbank(FIL_COPY,
 			fpath,
 			outdir + 'proc_%s.fil' % fname_stem,
