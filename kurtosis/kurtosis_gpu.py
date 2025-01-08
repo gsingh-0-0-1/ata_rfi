@@ -13,6 +13,8 @@ sklim_vals = {
 		1024 : [0.786484, 1.31218],
 	},
 	5 : {
+		32: [0.172532, 7.11963],
+		64: [0.224438, 4.75752],
 		256 : [0.526881, 2.18694],
 		512 : [0.649093, 1.69044],
 		1024 : [0.740405, 1.42332]
@@ -44,7 +46,6 @@ def apply_kurtosis_to_block(block: np.array, n_stds = 3):
 	# done computing sk_arr
 	# ################################
 
-
 	sk_mean = 1
 	sk_bounds = sklim_vals[n_stds][chunksize]
 
@@ -55,5 +56,11 @@ def apply_kurtosis_to_block(block: np.array, n_stds = 3):
 
 	maskedblock[cp.where(maskedblock == 0)] = cp.median(block_cp)
 
-	block = cp.asnumpy(maskedblock)
+	block[:] = cp.asnumpy(maskedblock)
+
+	if np.sum(block != cp.asnumpy(block_cp)) == 0:
+		print("WARNING: Highly unlikely -- no change due to SK in GPU code")
+
+	return mask
+
 

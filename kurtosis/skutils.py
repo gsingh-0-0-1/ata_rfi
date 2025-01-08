@@ -28,6 +28,8 @@ def sklim_bounds(std, nsamps):
 			1024 : [0.786484, 1.31218],
 		},
 		5 : {
+			32: [0.172532, 7.11963],
+			64: [0.224438, 4.75752],
 			256 : [0.526881, 2.18694],
 			512 : [0.649093, 1.69044],
 			1024 : [0.740405, 1.42332]
@@ -53,13 +55,15 @@ def sk_from_arr(data):
 		data of shape (nants, nfreqs, nsamples, npols)
 	"""
 
-	data = data - np.mean(data)
-	data = data / np.std(data)
+	#data = data - np.mean(data)
+	#data = data / np.std(data)
 
 	nants, nfreqs, nsamples, npols = data.shape
 	m = nsamples
 
 	d_dt = mag2(data)
+
+	print("CPU: mag2 sum:", d_dt.sum())
 
 	s1 = d_dt.sum(axis = 2, keepdims = True)
 	s2 = (d_dt ** 2).sum(axis = 2, keepdims = True)
@@ -67,8 +71,14 @@ def sk_from_arr(data):
 
 	return sk_array
 
-def mask_chunk(chunk, mask_method: MaskMethod = MaskMethod.CHUNK_MEDIAN, n_stds = 3, chunksize = SAMP_STEP):
+def mask_chunk(chunk, 
+		mask_method: MaskMethod = MaskMethod.CHUNK_MEDIAN, 
+		n_stds = 3, 
+		chunksize = SAMP_STEP,
+		return_mask = False):
 	sk_arr = sk_from_arr(chunk)
+	
+	print("CPU: sk_arr sum:", sk_arr.sum())
 
 	sk_mean = 1
 	
@@ -82,7 +92,9 @@ def mask_chunk(chunk, mask_method: MaskMethod = MaskMethod.CHUNK_MEDIAN, n_stds 
 	if mask_method == MaskMethod.CHUNK_MEDIAN:
 		maskedblock[np.where(maskedblock == 0)] = np.median(chunk)
 
-	return maskedblock, np.sum(mask) / mask.size
+	if not return_mask:
+		return maskedblock, np.sum(mask) / mask.size
+	return maskedblock, mask
 
 def write_chunk_to_fil(chunk, fileptr):
 	# sum over antenna axis
