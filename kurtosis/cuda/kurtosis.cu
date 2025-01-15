@@ -50,7 +50,7 @@ void calculateMean(
 
 // CUDA kernel to compute sk_array
 __global__ void computeSkArray(
-    const comp_float_t* block, float* output,
+    comp_float_t* block,
     int N_ANTS, int N_CHANS, int N_SAMPS, int N_POLS) {//, int m) {
 
 
@@ -75,37 +75,47 @@ __global__ void computeSkArray(
             s2 += v2 * v2;
         }
 
-        // Compute sk_array
+        // Compute sk value
         float sk = ((N_SAMPS + 1.0f) / (N_SAMPS - 1.0f)) * ((N_SAMPS * (s2 / (s1 * s1))) - 1.0f);
 
+        // based on sk we can zap the channel
+        // TODO: change sk thresholds / properly apply from sklim
+        if (sk > 3) {
+            int chan_start = ((ant * N_CHANS + chan) * N_SAMPS + 0) * N_POLS + pol;
+            for (int j = chan_start; j < chan_start + N_SAMPS * N_POLS; j = j + N_POLS) {
+                block[j].real = 0.0;
+                block[j].imag = 0.0;
+            }
+        }
+
         // Write the result to the output array
-        int out_idx = ((ant * N_CHANS + chan) * 1 + 0) * N_POLS + pol;
-        output[out_idx] = sk;
+        // int out_idx = ((ant * N_CHANS + chan) * 1 + 0) * N_POLS + pol;
+        // output[out_idx] = sk;
     }
 }
 
 // Host function to call the kernel
 void calculateSkArray(
-    const comp_float_t* d_block, float* d_output,
+    comp_float_t* d_block,
     int N_ANTS, int N_CHANS, int N_SAMPS, int N_POLS) {//, int m) {
 
     dim3 gridDim(N_ANTS, N_CHANS);    // One block per antenna and channel
     dim3 blockDim(N_POLS);           // One thread per polarization
 
     computeSkArray<<<gridDim, blockDim>>>(
-        d_block, d_output, N_ANTS, N_CHANS, N_SAMPS, N_POLS);//, m);
+        d_block, N_ANTS, N_CHANS, N_SAMPS, N_POLS);//, m);
 }
 
 
 int main() {
     // Define dimensions
-    int N_ANTS = 4, N_CHANS = 128, N_SAMPS = 1024, N_POLS = 2;
+    int N_ANTS = 4, N_CHANS = 4, N_SAMPS = 8, N_POLS = 2;
 
     // Allocate memory on host
     size_t input_size = N_ANTS * N_CHANS * N_SAMPS * N_POLS * sizeof(comp_float_t);
-    size_t output_size = N_ANTS * N_CHANS * 1 * N_POLS * sizeof(float);
+    // size_t output_size = N_ANTS * N_CHANS * 1 * N_POLS * sizeof(float);
     comp_float_t* h_block = (comp_float_t*)malloc(input_size);
-    float* h_output = (float*)malloc(output_size);
+    // float* h_output = (float*)malloc(output_size);
 
     std::random_device rd{};
     std::mt19937 gen{rd()};
@@ -121,37 +131,65 @@ int main() {
     }
 
     // pollute the first two channels
-    for (int i = 0; i < N_SAMPS / 8; i++) {
+    for (int i = 0; i < 4; i++) {
         h_block[i].real = 100.0f;
     }
 
+
+    // print block before
+    for (int ant = 0; ant < N_ANTS; ant++) {
+        for (int chan = 0; chan < N_CHANS; chan++) {
+            for (int pol = 0; pol < N_POLS; pol++) {
+                int chan_start = ((ant * N_CHANS + chan) * N_SAMPS + 0) * N_POLS + pol;
+                for (int j = chan_start; j < chan_start + N_SAMPS * N_POLS; j = j + N_POLS) {
+                    std::cout << h_block[j].real << " + " << h_block[j].imag << "i, ";
+                }
+                std::cout << std::endl;
+            }
+        }
+    }
+
+    std::cout << std::endl << std::endl;
+
     // Allocate memory on device
     comp_float_t *d_block;
-    float *d_output;
+    //float *d_output;
     cudaMalloc(&d_block, input_size);
-    cudaMalloc(&d_output, output_size);
+    //cudaMalloc(&d_output, output_size);
 
     // Copy data to device
     cudaMemcpy(d_block, h_block, input_size, cudaMemcpyHostToDevice);
 
     // Launch kernel
-    calculateSkArray(d_block, d_output, N_ANTS, N_CHANS, N_SAMPS, N_POLS);
+    calculateSkArray(d_block,  N_ANTS, N_CHANS, N_SAMPS, N_POLS);
 
     // Copy result back to host
-    cudaMemcpy(h_output, d_output, output_size, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_block, d_block, input_size, cudaMemcpyDeviceToHost);
+    //cudaMemcpy(h_output, d_output, output_size, cudaMemcpyDeviceToHost);
+
+    // print block after
+    for (int ant = 0; ant < N_ANTS; ant++) {
+        for (int chan = 0; chan < N_CHANS; chan++) {
+            for (int pol = 0; pol < N_POLS; pol++) {
+                int chan_start = ((ant * N_CHANS + chan) * N_SAMPS + 0) * N_POLS + pol;
+                for (int j = chan_start; j < chan_start + N_SAMPS * N_POLS; j = j + N_POLS) {
+                    std::cout << h_block[j].real << " + " << h_block[j].imag << "i, ";
+                }
+                std::cout << std::endl;
+            }
+        }
+    }
 
     //std::cout << d_block[0] << std::endl;
 
-    for (int i = 0; i < 20; i++) {
+    //for (int i = 0; i < 20; i++) {
         //std::cout << h_block[i * 8] << " " << h_block[i * 8 + 2] << " " << h_block[i * 8 + 4] << " " << h_block[i * 8 + 6] << " " << h_output[i] << std::endl;
-        std::cout << h_output[i] << std::endl;
-    }
+        //std::cout << h_output[i] << std::endl;
+    //}
 
     // Cleanup
     cudaFree(d_block);
-    cudaFree(d_output);
     free(h_block);
-    free(h_output);
 
     return 0;
 }
